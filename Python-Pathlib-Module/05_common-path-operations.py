@@ -105,3 +105,19 @@ to_delete = Path("data/prices.csv")
 if to_delete.exists():
     to_delete.unlink()
     print(f"Successfully deleted {to_delete.name}")
+
+
+
+# ============ The rmdir() method ============
+"""
+The rmdir() method removes an empty directory. Remember that rmdir() only works to remove 
+empty directories. The easiest way to delete a non-empty directory is to use shutil 
+library or the terminal.
+"""
+
+empty_dir = Path("empty_data_dir")
+empty_dir.rmdir()
+
+"""
+NOTE: Please be cautious when using unlink() or rmdir() because their results are permanent.
+"""
