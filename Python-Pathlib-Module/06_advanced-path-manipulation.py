@@ -107,7 +107,7 @@ to use the rglob() method, which has similar syntax:
 """
 
 notebooks = project_dir.rglob("*.ipynb")
-acripts = project_dir.rglob("*.py")
+scripts = project_dir.rglob("*.py")
 
 print(len(list(notebooks)))
-print(len(list(notebooks)))
+print(len(list(scripts)))
