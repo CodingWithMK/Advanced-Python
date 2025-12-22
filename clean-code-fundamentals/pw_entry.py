@@ -17,12 +17,11 @@ class PasswordEntry:
     username: str = ""
     
     # Create an entry using the generate_password() function.
-    def create_entry(website: str, email: str, username: str=""):
-        website = website
-        email = email
+    @classmethod
+    def create_entry(cls, website: str, email: str, username: str=""):
         generated_password = generate_password()
         
-        return website, email, generated_password, username
+        return cls(website, email, generated_password, username)
     
 if __name__ == "__main__":
     print(PasswordEntry.create_entry(website="Google", email="jack123@gmail.com"))
