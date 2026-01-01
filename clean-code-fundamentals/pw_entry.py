@@ -1,6 +1,9 @@
 from dataclasses import dataclass
+from pathlib import Path
 import string
 import secrets
+
+home = Path.home()
 
 def generate_password(length: int = 12) -> str:
     alphabet = string.ascii_letters + string.digits + string.punctuation
@@ -8,6 +11,9 @@ def generate_password(length: int = 12) -> str:
     generated_pw = "".join(generated)
     
     return generated_pw
+
+def get_database(path: Path) -> None:
+    pass
 
 @dataclass
 class PasswordEntry:
