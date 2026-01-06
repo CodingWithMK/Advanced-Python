@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import string
 import secrets
+import sqlite3
 
 def generate_password(length: int = 12) -> str:
     alphabet = string.ascii_letters + string.digits + string.punctuation
@@ -15,6 +16,18 @@ def get_db_path() -> Path:
     folder_path = home / '.my_password_manager'
     folder_path.mkdir(parents=True, exist_ok=True)
     return folder_path / "passwords.db"
+
+def init_db():
+    db_path = get_db_path()
+    with sqlite3.connect(db_path) as conn:
+        conn.execute("""
+                     CREATE TABLE IF NOT EXISTS passwords (
+                         website TEXT,
+                         email BLOB,
+                         password BLOB,
+                         username BLOB
+                     );
+                     """)
 
 
 @dataclass
