@@ -1,8 +1,28 @@
 from dataclasses import dataclass
 from pathlib import Path
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import base64
 import string
 import secrets
 import sqlite3
+
+def derive_key(master_password: str, salt: bytes) -> bytes:
+    """
+    Master-Key derivation using the Key Derivation Function (KDF)
+
+    Input: str -> master password, bytes -> salt
+
+    Returns: bytes -> URL safe base64 encoded key
+    """
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=600_000
+    )
+    
 
 def generate_password(length: int = 12) -> str:
     alphabet = string.ascii_letters + string.digits + string.punctuation
