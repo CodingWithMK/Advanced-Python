@@ -22,6 +22,25 @@ def derive_key(master_password: str, salt: bytes) -> bytes:
         salt=salt,
         iterations=600_000
     )
+
+def load_or_create_salt() -> Path:
+    """
+    Loading or creating a 16 bytes salt for Master-Key verification.
+    
+    :return: Salt (16 bytes)
+    :rtype: Path
+    """
+    home = Path.home()
+    salt_path = home / '.my_password_manager' / 'salt.bin'
+    if not salt_path.exists():
+        salt = secrets.token_bytes(16)
+        with open(salt_path, 'wb') as file:
+            file.write(salt)
+    else:
+        with open(salt_path, 'rb') as file:
+            salt = file.read()
+        
+    return salt
     
 
 def generate_password(length: int = 12) -> str:
