@@ -23,7 +23,7 @@ def derive_key(master_password: str, salt: bytes) -> bytes:
         iterations=600_000
     )
 
-def load_or_create_salt() -> Path:
+def load_or_create_salt() -> bytes:
     """
     Loading or creating a 16 bytes salt for Master-Key verification.
     
