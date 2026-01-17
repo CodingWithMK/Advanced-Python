@@ -23,6 +23,8 @@ def derive_key(master_password: str, salt: bytes) -> bytes:
         iterations=600_000
     )
 
+    return base64.urlsafe_b64encode(kdf.derive(master_password.encode()))
+
 def load_or_create_salt() -> bytes:
     """
     Loading or creating a 16 bytes salt for Master-Key verification.
