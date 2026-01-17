@@ -85,6 +85,25 @@ class PasswordEntry:
         
         return cls(website, email, generated_password, username)
     
+@dataclass
+class VaultManager:
+    master_password: str
+    salt: bytes
+
+    def __post_init__(self):
+        key = derive_key(self.master_password, self.salt)
+        self.cipher = Fernet(key)
+
+    def encrypt_data(self, data: str) -> bytes:
+        return self.cipher.encrypt(data.encode())
+    
+    def decrypt(self, encrypted_bytes: bytes) -> str:
+        return self.cipher.decrypt(encrypted_bytes).decode()
+    
+@dataclass
+class DatabaseManager:
+    db_path: Path
+    
 if __name__ == "__main__":
     # print(PasswordEntry.create_entry(website="Google", email="jack123@gmail.com"))
     print(get_db_path())
