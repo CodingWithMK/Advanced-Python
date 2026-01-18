@@ -90,6 +90,7 @@ class VaultManager:
     master_password: str
     salt: bytes
 
+    # Initialization for cipher features after main initialization
     def __post_init__(self):
         key = derive_key(self.master_password, self.salt)
         self.cipher = Fernet(key)
@@ -97,12 +98,19 @@ class VaultManager:
     def encrypt_data(self, data: str) -> bytes:
         return self.cipher.encrypt(data.encode())
     
-    def decrypt(self, encrypted_bytes: bytes) -> str:
+    def decrypt_data(self, encrypted_bytes: bytes) -> str:
         return self.cipher.decrypt(encrypted_bytes).decode()
     
 @dataclass
 class DatabaseManager:
     db_path: Path
+
+    def connect_db(db_path: Path) -> bytes:
+        db_path = get_db_path()
+        with sqlite3.connect(db_path) as conn:
+            conn.execute("""
+                         INSERT INTO passwords VALUES (?, ?, ?, ?)  
+                        """)
     
 if __name__ == "__main__":
     # print(PasswordEntry.create_entry(website="Google", email="jack123@gmail.com"))
