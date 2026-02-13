@@ -105,7 +105,13 @@ class VaultManager:
 class DatabaseManager:
     db_path: Path
 
-    def connect_db(db_path: Path) -> bytes:
+    def save_password_entry(
+        self,
+        db_path: Path,
+        website,
+        encrypted_email,
+        encrypted_pw,
+        encrypted_user) -> bytes:
         db_path = get_db_path()
         with sqlite3.connect(db_path) as conn:
             conn.execute("""
