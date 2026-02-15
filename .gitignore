@@ -11,3 +11,6 @@ wheels/
 
 # Example files
 /example_folder
+
+# Databases
+*.db
