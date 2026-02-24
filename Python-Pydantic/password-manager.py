@@ -74,12 +74,15 @@ def init_db():
                      """)
 
 
-@dataclass
-class PasswordEntry:
-    website: str
+class PasswordEntry(BaseModel):
+    website: str = Field(str_strip_whitespace=True, min_length=1)
     email: EmailStr
     password: str = Field(min_length=12)
-    username: Optional[str] = ""
+    username: Optional[str] = Field("", str_strip_whitespace=True)
+
+    model_config = {
+        "frozen": True
+    }
     
     # Create an entry using the generate_password() function.
     @classmethod
