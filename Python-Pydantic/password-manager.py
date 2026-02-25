@@ -5,7 +5,8 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from pydantic.types import StringConstraints
+from typing import Optional, Annotated
 import base64
 import string
 import secrets
@@ -75,10 +76,10 @@ def init_db():
 
 
 class PasswordEntry(BaseModel):
-    website: str = Field(str_strip_whitespace=True, min_length=1)
+    website: Annotated[str, StringConstraints(strip_whitespace=True)]
     email: EmailStr
     password: str = Field(min_length=12)
-    username: Optional[str] = Field("", str_strip_whitespace=True)
+    username: Annotated[str, StringConstraints(strip_whitespace=True)] = ""
 
     model_config = {
         "frozen": True
@@ -89,7 +90,12 @@ class PasswordEntry(BaseModel):
     def create_entry(cls, website: str, email: str, username: str=""):
         generated_password = generate_password()
         
-        return cls(website, email, generated_password, username)
+        return cls(
+            website=website,
+            email=email,
+            password=generated_password,
+            username=username
+        )
     
 @dataclass
 class VaultManager:
@@ -110,20 +116,64 @@ class VaultManager:
 @dataclass
 class DatabaseManager:
     db_path: Path
+    vault: VaultManager
 
     def save_password_entry(
         self,
-        db_path: Path,
-        website,
-        encrypted_email,
-        encrypted_pw,
-        encrypted_user) -> bytes:
-        db_path = get_db_path()
-        with sqlite3.connect(db_path) as conn:
-            conn.execute("""
-                         INSERT INTO passwords VALUES (?, ?, ?, ?)  
-                        """)
-    
+        entry: PasswordEntry):
+        """Encrypts an Pydantic object and saves it to the database."""
+        enc_mail = self.vault.encrypt_data(entry.email)
+        enc_pw = self.vault.encrypt_data(entry.password)
+        enc_user = self.vault.encrypt_data(entry.username)
+
+        query = """
+        INSERT INTO passwords (website, email, password, username) VALUES (?, ?, ?, ?);
+        """
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute(query, (entry.website, enc_mail, enc_pw, enc_user))
+        print(f"✅ Entry for {entry.website} saved successfully.")
+
+    def get_entry(self, website: str):
+        """Searches, decryptes and validates an entry."""
+        query = "SELECT email, password, username FROM passwords WHERE website = ?;"
+
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute(query, (website,))
+            row = cursor.fetchone() # Fetches first match
+
+        if not row:
+            raise ValueError(f"❌ No entry found for '{website}'.")
+        
+        # Decryption
+        # row[0] = email, row[1] = password, row[2] = username
+        dec_email = self.vault.decrypt_data(row[0])
+        dec_pw = self.vault.decrypt_data(row[1])
+        dec_user = self.vault.decrypt_data(row[2])
+
+        # Fit entry back to data validation
+        return PasswordEntry(
+            website=website,
+            email=dec_email,
+            password=dec_pw,
+            username=dec_user
+        )
+
+
 if __name__ == "__main__":
     # print(PasswordEntry.create_entry(website="Google", email="jack123@gmail.com"))
-    print(get_db_path())
+    init_db()
+    master_pw = "MyUltraSecureMasterPassword123!"
+    salt = load_or_create_salt()
+
+    vault = VaultManager(master_pw, salt)
+    db_manager = DatabaseManager(get_db_path(), vault)
+
+    new_entry = PasswordEntry.create_entry(website="Netflix", email="user123@web.com")
+
+    db_manager.save_password_entry(new_entry)
+
+    try:
+        retrieved = db_manager.get_entry("Netflix")
+        print(f"Found password: {retrieved.password}")
+    except ValueError as e:
+        print(e)
