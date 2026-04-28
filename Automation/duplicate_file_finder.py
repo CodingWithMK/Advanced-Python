@@ -7,7 +7,6 @@ import os
 @dataclass
 class DuplicateFinder:
     dir_path: Path
-    file_path: Path
     chunk_size: int = 65536
     file_size: float
     files_by_size: dict[int, list[Path]]
@@ -34,7 +33,7 @@ class DuplicateFinder:
                     with open(entry, "rb", buffering=self.chunk_size) as file:
                         hashlib.sha256(file)
 
-    def _scan(self):
+    def scan(self):
         pass
 
         
