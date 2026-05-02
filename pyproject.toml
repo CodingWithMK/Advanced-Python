@@ -8,5 +8,6 @@ dependencies = [
     "cryptography>=46.0.3",
     "pydantic[email]>=2.12.5",
     "rich>=14.3.2",
+    "send2trash>=2.1.0",
     "typer>=0.23.1",
 ]
