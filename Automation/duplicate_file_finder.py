@@ -102,6 +102,11 @@ class DuplicateFinder:
         self.potential_duplicates = temp_list
 
         return self.potential_duplicates
+    
+    def check_full_hash(self) -> list[Path]:
+        pass
+        
+        # TODO: Iterate through every potential duplicate, check for duplicates by making a full hash.
 
 
     
