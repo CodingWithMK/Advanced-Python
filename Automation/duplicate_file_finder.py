@@ -104,7 +104,40 @@ class DuplicateFinder:
         return self.potential_duplicates
     
     def check_full_hash(self) -> list[Path]:
-        pass
+        """
+        Gets potential duplicates and makes a full-hash on all potential duplicate
+        pairs to ensure real duplicants before removing.
+        """
+        confirmed_duplicates = []
+
+        for duplicate_group in self.potential_duplicates:
+            group_hashes = {}
+
+            for file_path in duplicate_group:
+                try:
+                    hasher = hashlib.new(self.hash_algorithm)
+
+                    with open(file_path, "rb") as file:
+                        while chunk := file.read(8192):
+                            hasher.update(chunk)
+                    
+                    full_hash = hasher.hexdigest()
+
+                    group_hashes.setdefault(full_hash, []).append(file_path)
+
+                except (PermissionError, OSError):
+                    continue
+
+            for file_hash, paths in group_hashes.items():
+                if len(paths) > 1:
+                    for duplicate_path in paths[1:]:
+                        try:
+                            send2trash.send2trash(duplicate_path)
+                            confirmed_duplicates.append(duplicate_path)
+                        except Exception:
+                            continue
+
+        return confirmed_duplicates
         
         # TODO: Iterate through every potential duplicate, check for duplicates by making a full hash.
 
