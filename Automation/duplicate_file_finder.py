@@ -129,8 +129,10 @@ class DuplicateFinder:
                 except (PermissionError, OSError):
                     continue
 
+            
             for file_hash, paths in group_hashes.items():
                 if len(paths) > 1:
+                    # Continuing duplicates (paths[1:]) which can be removed
                     for duplicate_path in paths[1:]:
                         try:
                             send2trash.send2trash(duplicate_path)
