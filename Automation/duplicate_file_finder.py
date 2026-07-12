@@ -118,6 +118,7 @@ class DuplicateFinder:
                     hasher = hashlib.new(self.hash_algorithm)
 
                     with open(file_path, "rb") as file:
+                        # read file in 8KB chunks for memory efficiency
                         while chunk := file.read(8192):
                             hasher.update(chunk)
                     
